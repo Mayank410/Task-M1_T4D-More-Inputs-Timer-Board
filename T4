@@ -1,0 +1,206 @@
+#define soil_sensor 2
+#define pir_sensor 3
+#define pir_sensor2 4
+
+#define led2 8
+#define led3 10
+#define led4 6
+
+volatile bool led_state = false;
+volatile bool led_state_2 = false;
+volatile bool led_state_3 = false;
+volatile bool led_state_4 = false;
+
+int i = 2;
+
+void starttimmerfunc()
+  {
+  	TCCR1A = 0;
+    TCCR1B = 0;
+    TCNT1  = 0;
+    OCR1A = 31249; //2ms
+    TCCR1B |= (1 << WGM12);
+    TCCR1B |= (1 << CS12) | (0 << CS11) | (1 << CS10);
+    TIMSK1 |= (1 << OCIE1A);
+  }
+  
+ISR(TIMER1_COMPA_vect){
+  Serial.print("Led Timmer ");
+  Serial.print(i);
+  Serial.println("ms");
+  digitalWrite(led4, digitalRead(led4) ^ 1);
+  i = i+2;
+}
+
+void setup() {
+  pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(led2, OUTPUT);
+  pinMode(led3, OUTPUT);
+  pinMode(led4, OUTPUT);
+  
+  pinMode(pir_sensor, INPUT);
+  pinMode(pir_sensor2, INPUT);
+  pinMode(soil_sensor, INPUT);
+  
+  Serial.begin(9600);
+  starttimmerfunc();
+  
+  noInterrupts();
+  PCIFR |= bit(PCIE2);
+  PCICR |= bit(PCIE2);
+  PCMSK2 |= bit (PCINT18);
+  PCMSK2 |= bit (PCINT19);
+  PCMSK2 |= bit (PCINT20);
+  interrupts();
+  
+}
+
+void loop() {
+ 
+}
+
+ISR(PCINT2_vect)
+{
+  if(digitalRead(soil_sensor) == HIGH) 
+  {
+    led_state_2 = !led_state_2;
+    digitalWrite(led2, led_state_2);
+    Serial.println("RISE IN SOIL MOISTURE VALUE Detected!");
+  }
+  if(digitalRead(pir_sensor) == HIGH) 
+  {
+    led_state = !led_state;
+    digitalWrite(LED_BUILTIN, led_state);
+    Serial.println("Motion Detected! --1");
+  }
+  if(digitalRead(pir_sensor2) == HIGH) 
+  {
+    led_state_3 = !led_state_3;
+  	digitalWrite(led3, led_state_3);
+  	Serial.println("Motion Detected! --2");
+  }  
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+#define soil_sensor 2
+#define pir_sensor 3
+#define led2 8
+volatile bool led_state = false;
+volatile bool led_state_2 = false;
+
+void setup() {
+  pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(led2, OUTPUT);
+  pinMode(pir_sensor, INPUT);
+  pinMode(soil_sensor, INPUT);
+  attachInterrupt(digitalPinToInterrupt(pir_sensor), ISR_VS, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(soil_sensor), ISR_VS2, CHANGE);
+  Serial.begin(9600);
+}
+
+void loop() {
+	delay(500);
+}
+
+void ISR_VS()
+{
+  led_state = !led_state;
+  digitalWrite(LED_BUILTIN, led_state);
+  Serial.println("Motion Detected!");
+}
+
+void ISR_VS2()
+{
+  led_state_2 = !led_state_2;
+  digitalWrite(led2, led_state_2);
+  Serial.println("RISE IN SOIL MOISTURE VALUE Detected!");
+}*/
+
+
+
+
+/*int readSensor() {
+	if (digitalRead(soil_sensor) == HIGH)
+    {
+    	Serial.println("Motion Detected!"); 
+    }
+}
+
+/*int pir_sensor = 3;
+volatile bool led_state = false;
+
+void setup()
+{
+  pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(pir_sensor, INPUT);
+  Serial.begin(9600);
+  attachInterrupt(digitalPinToInterrupt(pir_sensor), ISR_VS, CHANGE);
+}
+
+void loop()
+{
+  delay(500);
+}
+
+void ISR_VS()
+{
+  led_state = !led_state;
+  digitalWrite(LED_BUILTIN, led_state);
+  Serial.println("Motion Detected!");
+}*/
+
+
+
+
+
+
+/*
+int pir_sensor = 3;
+void setup() 
+{
+
+  pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(pir_sensor, INPUT);
+  Serial.begin(9600);
+}
+void loop()
+{
+  if (digitalRead(pir_sensor) == HIGH)
+  {    
+    digitalWrite(LED_BUILTIN, HIGH);
+    Serial.println("Motion Detected!"); 
+  } 
+  else 
+  {
+    digitalWrite(LED_BUILTIN, LOW);
+  }
+  delay(1000);
+}*/
